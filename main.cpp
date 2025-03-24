@@ -8,6 +8,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 #endif
 
 bool is_64bit() {
@@ -25,7 +26,7 @@ bool is_64bit() {
   );
 
   if (fnIsWow64Process && fnIsWow64Process(GetCurrentProcess(), &isWow64)) {
-    return isWow64;
+    return !isWow64;
   }
 
   return sizeof(void*) == 8;
