@@ -1,16 +1,10 @@
 #include <iostream>
 #include <stdio.h>
 #include <iomanip>
-
-#ifdef __APPLE__
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#endif
-
-#ifdef _WIN32
-#include <windows.h>
-typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
-#endif
+#include "is_64bit.hpp"
+#include "hw_info.hpp"
+#include "cpu_count.h"
+#include <thread>
 
 void print_data_types() {
     std::cout << "\nData Type Sizes:" << std::endl;
@@ -33,42 +27,46 @@ void print_data_types() {
     std::cout << std::setw(20) << std::left << "char32_t" << std::setw(10) << sizeof(char32_t) << std::endl;
 }
 
-bool is_64bit() {
-  #if defined(__APPLE__)
-  char arch[32];
-  size_t size = sizeof(arch);
-  return sysctlbyname("hw.machine", arch, &size, NULL, 0) == 0 && 
-          std::string(arch).find("64") != std::string::npos;
+void print_system_info() {
+    std::cout << "\nSystem Information:" << std::endl;
+    std::cout << std::string(50, '-') << std::endl;
 
-  #elif defined(_WIN32)
-  BOOL isWow64 = FALSE;
+    // Get and display OS information
+    auto osInfo = SystemInfo::getOSInfo();
+    std::cout << "Operating System: " << osInfo.name << std::endl;
+    std::cout << "Version: " << osInfo.version << std::endl;
+    std::cout << "Build Number: " << osInfo.buildNumber << std::endl;
+    std::cout << "Architecture: " << osInfo.architecture << std::endl;
 
-  auto fnIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(
-    GetProcAddress(GetModuleHandleW(L"kernel32"), "IsWow64Process")
-  );
+    // Get and display CPU information
+    auto cpuInfo = SystemInfo::getCPUInfo();
+    std::cout << "\nCPU Information:" << std::endl;
+    std::cout << "Processor: " << cpuInfo.name << std::endl;
+    std::cout << "Manufacturer: " << cpuInfo.manufacturer << std::endl;
+    std::cout << "Number of Physical Cores: " << cpu_count() << std::endl;
+    //may return 0 when not able to detect
+    const auto processor_count = std::thread::hardware_concurrency();
+    std::cout << "Logical Processors: " << processor_count << std::endl;
 
-  if (fnIsWow64Process && fnIsWow64Process(GetCurrentProcess(), &isWow64)) {
-    return !isWow64;
-  }
+    // Get and display memory information
+    auto memInfo = SystemInfo::getMemoryInfo();
+    std::cout << "\nMemory Information:" << std::endl;
+    std::cout << "Total Physical Memory: " << (memInfo.totalPhysicalMemory / 1024.0 / 1024.0) << " GB" << std::endl;
+    std::cout << "Available Physical Memory: " << (memInfo.availablePhysicalMemory / 1024.0 / 1024.0) << " GB" << std::endl;
+    std::cout << "Total Virtual Memory: " << (memInfo.totalVirtualMemory / 1024.0 / 1024.0) << " GB" << std::endl;
+    std::cout << "Available Virtual Memory: " << (memInfo.availableVirtualMemory / 1024.0 / 1024.0) << " GB" << std::endl;
 
-  return sizeof(void*) == 8;
-  #endif
+    // Get and display disk drives
+    auto drives = SystemInfo::getDiskDrives();
+    std::cout << "\nDisk Drives:" << std::endl;
+    for (const auto& drive : drives) {
+        std::cout << drive << " ";
+    }
+    std::cout << std::endl;
 }
 
 int main() {
-  char* device_type = new char[20];
-  #ifdef __APPLE__
-    snprintf(device_type, 14, " Mac Machine.");
-  #elif _WIN32
-    snprintf(device_type, 18, " Windows Machine.");
-  #endif
-  if (is_64bit()) {
-    std::cout << "You are on a 64-bit" << device_type << std::endl;
-  } else {
-    std::cout << "You are on a 32-bit" << device_type << std::endl;
-  }
-  delete[] device_type;
-  
-  print_data_types();
-  return 0;
+    print_system_info();
+    print_data_types();
+    return 0;
 }
