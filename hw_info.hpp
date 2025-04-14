@@ -3,10 +3,21 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+
+#ifdef _WIN32
 #include <windows.h>
 #include <comdef.h>
 #include <Wbemidl.h>
 #pragma comment(lib, "wbemuuid.lib")
+#elif defined(__APPLE__)
+#include <sys/sysctl.h>
+#include <sys/utsname.h>
+#include <mach/mach.h>
+#include <mach/mach_host.h>
+#include <mach/mach_init.h>
+#include <mach/vm_statistics.h>
+#include <mach/mach_types.h>
+#endif
 
 class SystemInfo {
 public:
@@ -39,7 +50,9 @@ public:
     static std::string getUserName();
 
 private:
+#ifdef _WIN32
     static std::string getWMIValue(IWbemClassObject* pclsObj, const wchar_t* property);
     static void initializeCOM();
     static void cleanupCOM();
+#endif
 };

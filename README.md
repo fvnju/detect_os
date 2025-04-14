@@ -1,9 +1,8 @@
-
 # SYSTEM INFORMATION REPORT WITH C++
 
 This will just print out your system information into the console and give a list of data types in C++.
 
-*Nothing to crazy, innit?*
+_Nothing to crazy, innit?_
 
 ## Authors
 
@@ -13,11 +12,11 @@ This will just print out your system information into the console and give a lis
 
 In order to run this project, you'll need:
 
-- g++ compiler
+- g++ (OR clang++ for mac) compiler
 - cmake
 - make
 
-Note: This has only been tested for Windows 11.
+Note: This has been tested for Windows 11 and Mac OS Sonoma (Intel).
 
 To build the project:
 
@@ -30,4 +29,3 @@ To run the project:
 ```bash
   make run
 ```
-    

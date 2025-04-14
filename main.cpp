@@ -7,24 +7,56 @@
 #include <thread>
 
 void print_data_types() {
-    std::cout << "\nData Type Sizes:" << std::endl;
-    std::cout << std::setw(20) << std::left << "Data Type" << std::setw(10) << "Size (bytes)" << std::endl;
-    std::cout << std::string(32, '-') << std::endl;
+    std::cout << "\nC++ Data Type Representations" << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
     
-    std::cout << std::setw(20) << std::left << "bool" << std::setw(10) << sizeof(bool) << std::endl;
-    std::cout << std::setw(20) << std::left << "char" << std::setw(10) << sizeof(char) << std::endl;
-    std::cout << std::setw(20) << std::left << "short" << std::setw(10) << sizeof(short) << std::endl;
-    std::cout << std::setw(20) << std::left << "int" << std::setw(10) << sizeof(int) << std::endl;
-    std::cout << std::setw(20) << std::left << "long" << std::setw(10) << sizeof(long) << std::endl;
-    std::cout << std::setw(20) << std::left << "long long" << std::setw(10) << sizeof(long long) << std::endl;
-    std::cout << std::setw(20) << std::left << "float" << std::setw(10) << sizeof(float) << std::endl;
-    std::cout << std::setw(20) << std::left << "double" << std::setw(10) << sizeof(double) << std::endl;
-    std::cout << std::setw(20) << std::left << "long double" << std::setw(10) << sizeof(long double) << std::endl;
-    std::cout << std::setw(20) << std::left << "void*" << std::setw(10) << sizeof(void*) << std::endl;
-    std::cout << std::setw(20) << std::left << "size_t" << std::setw(10) << sizeof(size_t) << std::endl;
-    std::cout << std::setw(20) << std::left << "wchar_t" << std::setw(10) << sizeof(wchar_t) << std::endl;
-    std::cout << std::setw(20) << std::left << "char16_t" << std::setw(10) << sizeof(char16_t) << std::endl;
-    std::cout << std::setw(20) << std::left << "char32_t" << std::setw(10) << sizeof(char32_t) << std::endl;
+    // Helper lambda for formatting
+    auto print_type = [](const char* name, size_t size, const char* range, const char* notes = "") {
+        std::cout << std::setw(20) << std::left << name 
+                  << std::setw(10) << std::right << size << " bytes"
+                  << std::setw(40) << std::left << range
+                  << notes << std::endl;
+    };
+
+    std::cout << "\nFundamental Types:" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    print_type("bool", sizeof(bool), "0 or 1", "Implementation-defined size, typically 1 byte");
+    print_type("char", sizeof(char), "-128 to 127", "Minimum size: 1 byte, may be signed or unsigned");
+    print_type("unsigned char", sizeof(unsigned char), "0 to 255", "Minimum size: 1 byte");
+    print_type("signed char", sizeof(signed char), "-128 to 127", "Minimum size: 1 byte");
+    print_type("wchar_t", sizeof(wchar_t), "Implementation-defined", "Wide character type, size varies by platform");
+    print_type("char16_t", sizeof(char16_t), "0 to 65535", "UTF-16 character");
+    print_type("char32_t", sizeof(char32_t), "0 to 4294967295", "UTF-32 character");
+
+    std::cout << "\nInteger Types:" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    print_type("short", sizeof(short), "-32768 to 32767", "Minimum size: 2 bytes");
+    print_type("unsigned short", sizeof(unsigned short), "0 to 65535", "Minimum size: 2 bytes");
+    print_type("int", sizeof(int), "-2147483648 to 2147483647", "Minimum size: 2 bytes, typically 4 bytes");
+    print_type("unsigned int", sizeof(unsigned int), "0 to 4294967295", "Minimum size: 2 bytes, typically 4 bytes");
+    print_type("long", sizeof(long), "Implementation-defined", "Minimum size: 4 bytes");
+    print_type("unsigned long", sizeof(unsigned long), "Implementation-defined", "Minimum size: 4 bytes");
+    print_type("long long", sizeof(long long), "-2^63 to 2^63-1", "Minimum size: 8 bytes");
+    print_type("unsigned long long", sizeof(unsigned long long), "0 to 2^64-1", "Minimum size: 8 bytes");
+
+    std::cout << "\nFloating-Point Types:" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    print_type("float", sizeof(float), "±1.17549e-38 to ±3.40282e+38", "IEEE 754 single precision (32-bit)");
+    print_type("double", sizeof(double), "±2.22507e-308 to ±1.79769e+308", "IEEE 754 double precision (64-bit)");
+    print_type("long double", sizeof(long double), "Implementation-defined", "Extended precision, typically 80-bit or 128-bit");
+
+    std::cout << "\nPointer Types:" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+    print_type("void*", sizeof(void*), "Implementation-defined", "Pointer to any type");
+    print_type("size_t", sizeof(size_t), "0 to 2^64-1", "Unsigned integer type for sizes");
+    print_type("ptrdiff_t", sizeof(ptrdiff_t), "Implementation-defined", "Signed integer type for pointer differences");
+
+    std::cout << "\nNotes:" << std::endl;
+    std::cout << "1. All sizes are implementation-defined and may vary by platform" << std::endl;
+    std::cout << "2. Integer types follow two's complement representation" << std::endl;
+    std::cout << "3. Floating-point types follow IEEE 754 standard where supported" << std::endl;
+    std::cout << "4. Pointer sizes depend on the target architecture (32-bit vs 64-bit)" << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
 }
 
 void print_system_info() {
@@ -37,6 +69,11 @@ void print_system_info() {
     std::cout << "Version: " << osInfo.version << std::endl;
     std::cout << "Build Number: " << osInfo.buildNumber << std::endl;
     std::cout << "Architecture: " << osInfo.architecture << std::endl;
+    if (is_64bit()) {
+        std::cout << "Is 64 bit?: " << "YES" << std::endl;
+    } else {
+        std::cout << "Is 64 bit?: " << "NO" << std::endl;
+    }
 
     // Get and display CPU information
     auto cpuInfo = SystemInfo::getCPUInfo();
@@ -51,10 +88,13 @@ void print_system_info() {
     // Get and display memory information
     auto memInfo = SystemInfo::getMemoryInfo();
     std::cout << "\nMemory Information:" << std::endl;
-    std::cout << "Total Physical Memory: " << (memInfo.totalPhysicalMemory / 1024.0 / 1024.0) << " GB" << std::endl;
-    std::cout << "Available Physical Memory: " << (memInfo.availablePhysicalMemory / 1024.0 / 1024.0) << " GB" << std::endl;
-    std::cout << "Total Virtual Memory: " << (memInfo.totalVirtualMemory / 1024.0 / 1024.0) << " GB" << std::endl;
-    std::cout << "Available Virtual Memory: " << (memInfo.availableVirtualMemory / 1024.0 / 1024.0) << " GB" << std::endl;
+    // Convert bytes to GB (1 GB = 1024^3 bytes)
+    const double GB = 1024.0 * 1024.0 * 1024.0;
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "Total Physical Memory: " << (memInfo.totalPhysicalMemory / GB) << " GB" << std::endl;
+    std::cout << "Available Physical Memory: " << (memInfo.availablePhysicalMemory / GB) << " GB" << std::endl;
+    std::cout << "Total Virtual Memory: " << (memInfo.totalVirtualMemory / GB) << " GB" << std::endl;
+    std::cout << "Available Virtual Memory: " << (memInfo.availableVirtualMemory / GB) << " GB" << std::endl;
 
     // Get and display disk drives
     auto drives = SystemInfo::getDiskDrives();
